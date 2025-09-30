@@ -45,48 +45,7 @@ module.exports=(serverExpress)=>{
     //#endregion
 
     //#region---funciones middleware especificas para procesar determinadas rutas (PROCESADO DE ENRUTAMIENTO O ROUTING) ----- 
-    serverExpress.use('/api/Cliente/Registro', async(req,res,next)=>{
-      try{    
-      console.log(`datos mandados en el body por cliente REACT desde el componente Registro: ${JSON.stringify(req.body)}`);
 
-            //----- 1º insertar los datos en la bd: HSN coleccion clientes (hacer validaciones antes de meter datos!!!!)
-            await mongoose.connect(process.env.URL_MONGODB);
-
-
-            let resInsert = await mongoose.connection.collection('cliente').insertOne(
-
-              {
-                 nombre : req.body.nombre,
-                 apellidos : req.body.apellidos,
-                 genero : req.body.genero,
-                 cuenta : {
-                    email: req.body.email,
-                    password: bcrypt.hashSync( req.body.password, 10),
-                    cuentaActivada : false,
-                    imagenAvatae: '',
-                    fechacreacioncuenta: Date.now(),
-                    
-                 },
-                 direcciones : [],
-                 telefonocontacto:'',
-                 pedidos:[],
-                 listafavoritos:[],
-                 metodospago: [],
-
-
-
-
-              }
-            );
-
-            console.log(`la operacion de registro ha ido vien y su resultado es ${JSON.stringify(resInsert)}`)
-
-
-            res.status(200).send({codigo:0, mensaje:'datos recibidos ok..'});
-      }catch(error){
-        console.log("error en registro de datos del cliente : ${error}")
-        res.status(200).send({codigo: 1, mensaje: "error en registro de datos del cliente: ${error}"})
-      }
-    });
+    serverExpress.use('/api/Cliente', require('./config_enrutamiento/endpointsCliente'));
     //#endregion
     }

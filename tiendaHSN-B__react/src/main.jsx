@@ -8,6 +8,6 @@ import Registro from './componentes/zonaCliente/RegistroComponet/Registro.jsx'
 //import Raiz from './Raiz.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Registro />
+    <Login />
   </StrictMode>,
 )
