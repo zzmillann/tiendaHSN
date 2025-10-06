@@ -47,5 +47,6 @@ module.exports=(serverExpress)=>{
     //#region---funciones middleware especificas para procesar determinadas rutas (PROCESADO DE ENRUTAMIENTO O ROUTING) ----- 
 
     serverExpress.use('/api/Cliente', require('./config_enrutamiento/endpointsCliente'));
+    serverExpress.use('/api/Tienda', require('./config_enrutamiento/endpointsTienda'));
     //#endregion
     }

@@ -1,33 +1,46 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+
 import './App.css'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import Layout from './componentes/zonaTienda/LayOut/Layout'
+import Registro from './componentes/zonaCliente/RegistroComponent/Registro.jsx'
+import Login from './componentes/zonaCliente/LoginComponent/Login.jsx'
+import Home from './componentes/zonaTienda/Inicio/Home.jsx'
+//configuramos el modulo de enrutamiento de react , react-router-dom: se encarga de detectar un cambio en la URL del 
+//navegador y mostrar el compoente asociado a esa URL. Para hacer eso son dos pasos basicos:
+//1. Usando el metodo createBrowserRouter() creamos un objeto router que contiene las rutas de la aplicacion; son objetos ROUTE con
+//con propiedades especificas como son : path (ruta URL) , element (componente a rederizar en esa ruta), childeren (rutas hijas)
+
+//2 usando el componente <RouterProvider> QUE SE MIPORTA DE react-router-dom, y pasandole como prop el objeto router creado en el primer 
+//paso, hacemos que la aplicacion use ese sistema de enrutamiento.
+
+
+const router = createBrowserRouter(
+  [
+    {element: <Layout/>, children: [
+      {path:'/', element: <Home />},
+      {path: 'Cliente', children: [
+        {path:'/Cliente/Registro', element:<Registro/>},
+        {path:'/Cliente/Login', element:<Login/>}
+      ]}
+    ],
+      loader: async ({request, params}) => {
+        console.log(`ejecutando loader antes de la carga del layout request: ${JSON.stringify(request)} , params: ${JSON.stringify(params)}`);
+        let petCategorias = await fetch(`http://localhost:3000/api/Tienda/Categorias?pathCategoria=principales`);
+        let respuestaCategorias = await petCategorias.json();
+        console.log(`respuestaCategorias recibida en el loader del layout: ${JSON.stringify(respuestaCategorias)}`);
+        return respuestaCategorias.categorias;
+      }
+    }
+
+  ]
+)
+
 
 function App() {
-  const [count, setCount] = useState(0)
-
+ 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+    <RouterProvider router={router}/>
     </>
   )
 }
