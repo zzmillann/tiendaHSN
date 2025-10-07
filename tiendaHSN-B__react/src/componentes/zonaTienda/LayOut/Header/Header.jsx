@@ -1,5 +1,5 @@
-import React, { useEffect, useState,useRef } from 'react';
-import {Link, Navigate} from 'react-router-dom';
+import React, {  useState,useRef, useEffect } from 'react';
+import {Link, useLoaderData} from 'react-router-dom';
 import './Header.css';
 
 /*
@@ -11,40 +11,39 @@ import './Header.css';
 */
 
 const Header = () => {
-  const hideTimer = useRef(null); // timer para ocultar el mega panel
 
-  const [categorias, setCategorias] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+//como recibimos las categorias desde el loader
+//usando el hoohk useLoaderData
+//const categorias =useLoaderData();
+//console.log(`categorias recibidas en el header desde el loader del layout: ${JSON.stringify(categorias)}`);
+
+
+const [categorias, setCategorias] = useState([]); // categorias principales
+
+
+useEffect(() => {
+
+    fetch('http://localhost:3000/api/Tienda/Categorias?pathCategoria=principales',
+    {method: 'GET'})
+    .then(async response => {
+      let bodyRespuesta = await response.json();
+      console.log(`Categorias principales recibidas en el header: ${JSON.stringify(bodyRespuesta)}`);
+      setCategorias(bodyRespuesta.categorias);
+    })
+    .catch(error => {
+      console.error('Error al obtener las categorias principales:', error);
+      setCategorias([]);
+    });
+    
+}, []); // el array vacio hace que se ejecute solo una vez al montar el componente
+ 
+
+const hideTimer = useRef(null); // timer para ocultar el mega panel
+
   const [activeParent, setActiveParent] = useState(null); // pathCategoria activa
   const [showPanel, setShowPanel] = useState(false); // mostrar/ocultar mega panel
-  
-  useEffect(() => {
-    let mounted = true;
-    fetch('http://localhost:3000/api/Tienda/Categorias?pathCat=raices')
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((datosBody) => {
-        if (!mounted) return;
-        setCategorias(Array.isArray(datosBody.datos) ? datosBody.datos : []);
-      })
-      .catch((err) => {
-        if (!mounted) return;
-        console.error('Error cargando categorias:', err);
-        setError(err.message || 'Error');
-      })
-      .finally(() => {
-        if (!mounted) return;
-        setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
+ 
   // Construir árbol simple de categorías cuando cambian las categorias
 
 
@@ -128,28 +127,32 @@ const Header = () => {
           {/* Categories navbar */}
           <div className=" border-bottom">
             <div className="container">
-              <ul id="catsppales" className="nav d-flex align-items-center overflow-auto" style={{ whiteSpace: 'nowrap' }}>
-                {loading && (
-                  <li className="nav-item px-3 py-2 text-muted">Cargando categorías...</li>
-                )}
+             <ul id="catsppales" className="nav d-flex align-items-center overflow-auto" style={{ whiteSpace: 'nowrap' }}>
+  {(!categorias || categorias.length === 0) ? (
+    <li className="nav-item px-3 py-2 text-danger">
+      No se pudieron cargar las categorías
+    </li>
+  ) : (
+    categorias.map((categoria, pos) => (
+      <li
+        className="nav-item"
+        key={pos}
+        onMouseEnter={() => handleEnterParent(categoria)}
+        onMouseLeave={handleLeaveAll}
+      >
+        <Link
+          className={`nav-link px-3 ${activeParent === categoria.pathCategoria ? 'active' : ''}`}
+          to={`/Productos/${encodeURIComponent(categoria.pathCategoria)}`}
+        >
+          <span className="catsppales">
+            {categoria.nombreCategoria} <i className='fas fa-chevron-down'></i>
+          </span>
+        </Link>
+      </li>
+    ))
+  )}
+</ul>
 
-                {error || categorias.length === 0 && (
-                  <li className="nav-item px-3 py-2 text-danger">Error cargando categorías</li>
-                )}
-
-                {!loading && !error && categorias.length > 0 && categorias.map((categoria,pos) => (
-                  <li
-                    className="nav-item"
-                    key={pos}
-                    onMouseEnter={() => handleEnterParent(categoria)}
-                    onMouseLeave={() => handleLeaveAll()}
-                  >
-                    <Link className={`nav-link px-3 ${activeParent === categoria.pathCategoria ? 'active' : ''}`} to={`/Productos/${encodeURIComponent(categoria.pathCategoria)}`}>
-                      <span className="catsppales">{categoria.nombreCategoria} <i className='fas fa-chevron-down'></i></span>   
-                    </Link>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
         </div>
