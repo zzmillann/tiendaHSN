@@ -10,7 +10,11 @@ objetoRouterTienda.get('/Categorias',
             const pathCategoria = req.query.pathCategoria; //parabuscar las categorias primcipales
 
             await mongoose.connect(process.env.URL_MONGODB);
-            let patronBusqueda = pathCategoria === 'principales' ? /^\d+$/ : new RegExp(`^${pathCategoria}-\d+$`);
+            let patronBusqueda = pathCategoria === 'principales' ? /^\d+$/ : new RegExp(`^${pathCategoria}-\\d+$`);
+
+            console.log(`🧪 pathCategoria recibido: ${pathCategoria}`);
+            console.log(`🧪 patrón de búsqueda generado: ${patronBusqueda}`);
+
             let categoriasCursor = await mongoose.connection.db
             .collection('categorias')
             .find({ pathCategoria: patronBusqueda })

@@ -34,7 +34,7 @@ objetoRouter.post('/Registro', async (req,res,next)=>{
                                             pedidos:[],
                                             listaFavoritos:[],
                                             pedidoActual: { },
-                                            metodosPago: [ ]
+                                            metodosPago: []
 
                                           }
                                         );

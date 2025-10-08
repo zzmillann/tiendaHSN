@@ -1,5 +1,5 @@
-import React, {  useState,useRef, useEffect } from 'react';
-import {Link, useLoaderData} from 'react-router-dom';
+import {  useState,useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom'; 
 import './Header.css';
 
 /*
@@ -18,7 +18,12 @@ const Header = () => {
 //const categorias =useLoaderData();
 //console.log(`categorias recibidas en el header desde el loader del layout: ${JSON.stringify(categorias)}`);
 
+const hideTimer = useRef(null); // timer para ocultar el mega panel
 
+  const [activeParent, setActiveParent] = useState(null); // pathCategoria activa
+  const [showPanel, setShowPanel] = useState(false); // mostrar/ocultar mega panel
+ 
+const [subcategorias, setSubcategorias] = useState([]); // subcategorias de la categoria activa
 const [categorias, setCategorias] = useState([]); // categorias principales
 
 
@@ -38,12 +43,23 @@ useEffect(() => {
     
 }, []); // el array vacio hace que se ejecute solo una vez al montar el componente
  
+useEffect(() => {
+   fetch(`http://localhost:3000/api/Tienda/Categorias?pathCategoria=${activeParent}`,
+    {method: 'GET'})
+    .then(async response => {
+      let bodyRespuesta = await response.json();
+      console.log(`Subcategorias recibidas en el header: ${JSON.stringify(bodyRespuesta)}`);
+      setSubcategorias(bodyRespuesta.categorias);
+    })
+    .catch(error => {
+      console.error('Error al obtener las subcategorias:', error);
+      setSubcategorias([]);
+    });
+}, [activeParent]); // se ejecuta cada vez que cambia activeParent
 
-const hideTimer = useRef(null); // timer para ocultar el mega panel
 
-  const [activeParent, setActiveParent] = useState(null); // pathCategoria activa
-  const [showPanel, setShowPanel] = useState(false); // mostrar/ocultar mega panel
- 
+
+
   // Construir árbol simple de categorías cuando cambian las categorias
 
 
@@ -143,6 +159,7 @@ const hideTimer = useRef(null); // timer para ocultar el mega panel
         <Link
           className={`nav-link px-3 ${activeParent === categoria.pathCategoria ? 'active' : ''}`}
           to={`/Productos/${encodeURIComponent(categoria.pathCategoria)}`}
+          style={{ fontSize: '1rem', fontWeight: '400' }}
         >
           <span className="catsppales">
             {categoria.nombreCategoria} <i className='fas fa-chevron-down'></i>
@@ -164,7 +181,23 @@ const hideTimer = useRef(null); // timer para ocultar el mega panel
           onMouseEnter={handleEnterPanel}
           onMouseLeave={handleLeavePanel}
         >
-          <h1>subcats...</h1>
+          <ul style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', listStyle: 'none', padding: 0, margin: 0 }}>
+            {(!subcategorias || subcategorias.length === 0) ? (
+              <li className="text-danger p-3">
+                No se pudieron cargar las subcategorías
+              </li>
+            ) : (
+              subcategorias.map((subcat, index) => (
+                <li key={index} className="p-2">
+                  <Link to={`/Productos/${encodeURIComponent(subcat.pathCategoria)}`} className="text-decoration-none"
+                   style={{ fontSize: '0.6rem', fontWeight: '250' }} >
+                    {subcat.nombreCategoria}
+                   
+                  </Link>
+                </li>
+              ))
+            )}
+          </ul>
         </div>
       )}
 
