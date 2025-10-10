@@ -39,4 +39,7 @@ objetoRouterTienda.get('/Categorias',
     }
 )
 
+
+
+
 module.exports = objetoRouterTienda;
